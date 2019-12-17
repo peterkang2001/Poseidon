@@ -2,6 +2,12 @@
 # -*- coding: utf-8 -*-
 """
    Author:       kangliang
-   date:         2019-12-16
+   date:         2019-05-15
 """
+
+import pytest
+
+
+class HttpResponse:
+    pass 
 

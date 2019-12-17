@@ -12,12 +12,15 @@ setup(
     # 版本信息
     version='0.0.1',
     description='基于Python技术栈的API测试框架',
-    keywords = ['Poseidon', 'pytest', 'test', 'testframework'],
-
-    platforms = "any",
+    keywords=['Poseidon', 'pytest', 'test', 'testframework'],
     url="https://peterkang2001.github.io/info/",
     author="kangliang",
     author_email="peterkang2001@gmail.com",
+
+    include_package_data=True,  # 自动打包文件夹内所有数据
+    zip_safe=False,  # 设定项目包为安全，不用每次都检测其安全性
+
+    py_modules=['Poseidon/bin/po'],
 
     packages=[
         # 'Tetis',
@@ -31,10 +34,10 @@ setup(
         # 'Tetis.ui.util',
     ],
 
-    include_package_data=True,  # 自动打包文件夹内所有数据
-    zip_safe=False,  # 设定项目包为安全，不用每次都检测其安全性
+
 
     install_requires = [
+        'Click',
         # 'PyYAML',
         # "requests",
         # "pytest",
@@ -44,11 +47,15 @@ setup(
         # 'urllib3',
     ],
 
-    entry_points = {
-        'pytest11': [
-            'Tetis = Tetis.plugins.deathtrap_coral',
-            'pc_ui_fixture = Tetis.plugins.light_of_the_mermaid'
-        ]
+    # entry_points = {
+        # 'pytest11': [
+        #     'Tetis = Tetis.plugins.deathtrap_coral',
+        #     'pc_ui_fixture = Tetis.plugins.light_of_the_mermaid'
+        # ]
+
+    # },
+    entry_points={
+     'console_scripts': ['po = Poseidon.bin.po:cli']
     },
     classifiers = ["Framework :: Pytest"]
 )
