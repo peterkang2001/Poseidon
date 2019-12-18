@@ -6,7 +6,7 @@
 """
 import os
 import sys
-from Poseidon.core.files.files_exception import *
+from poseidon.core.exceptions import *
 
 def dir_is_exists(path):
     if os.path.exists(path):

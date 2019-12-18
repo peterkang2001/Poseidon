@@ -4,8 +4,8 @@
    Author:       kangliang
    date:         2019-12-17
 """
-from Poseidon.core.files.utils import file_is_exists, dir_is_exists
-from Poseidon.core.files.files_exception import *
+from poseidon.core.files.utils import file_is_exists, dir_is_exists
+from poseidon.core.exceptions import *
 import pytest
 import os
 class Test_file_exists:

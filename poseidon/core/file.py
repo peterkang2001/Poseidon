@@ -6,12 +6,19 @@
 """
 import os
 import sys
+from poseidon.core.exceptions import *
 
 def directory_is_exists(path):
     """判断目录是否存在"""
     if os.path.exists(path):
-        sys.stdout.write("目录不存在")
+        return True
     else:
-        sys.stdout.write("目录不存在")
+        raise DirectoryNotFoundException
 
 
+def file_is_exists(path):
+    """判断文件是否存在"""
+    if os.path.exists(path):
+        return True
+    else:
+        raise FileNotFoundException
