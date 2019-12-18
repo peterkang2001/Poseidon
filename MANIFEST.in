@@ -1,0 +1,6 @@
+
+include *.md
+include LICENSE.txt
+recursive-include font *
+recursive-include Images *
+recursive-include sounds *
