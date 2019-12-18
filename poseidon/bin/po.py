@@ -5,7 +5,7 @@
    date:         2019-12-13
 """
 import click
-from poseidon.bin.scripts.command import start
+from poseidon.bin.scripts.command import command_start
 
 
 @click.group()
@@ -13,11 +13,10 @@ def cli():
     pass
 
 @cli.command()
-@click.argument('name')
+@click.argument('name', default="mysite")
 def startproject(name):
     """create test project by scaffold """
-    start(name)
-
+    command_start(name)
 
 
 

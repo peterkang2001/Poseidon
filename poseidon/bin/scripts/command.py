@@ -4,21 +4,9 @@
    Author:       kangliang
    date:         2019-12-16
 """
-# import shutil
-# import os
-from poseidon.core.file import *
-
-def start(name):
-    _project_name = None
-    if name is None:
-        _project_name = "mytest"
-    else:
-        _project_name = name
+import os
+from poseidon.core.files.utils import *
 
 
-    # directory_is_exists("aa")
-
-# def create_empty_test_directory(name):
-
-
-
+def command_start(name):
+    print(get_project_path_info())
