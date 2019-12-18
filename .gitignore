@@ -130,6 +130,9 @@ dmypy.json
 
 # by customize config
 .idea/*.*
-.idea/
+/.idea
 .idea/Poseidon.iml
 plugins_tmp/
+poseidon_test.egg-info/
+.pytest_cache/
+dist/
