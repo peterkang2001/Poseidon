@@ -16,7 +16,7 @@ def start(name):
         _project_name = name
 
 
-    directory_is_exists("aa")
+    # directory_is_exists("aa")
 
 # def create_empty_test_directory(name):
 

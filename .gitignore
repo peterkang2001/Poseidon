@@ -128,11 +128,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# by customize config
-.idea/*.*
-/.idea
-.idea/Poseidon.iml
-plugins_tmp/
-poseidon_test.egg-info/
-.pytest_cache/
-dist/
+# 自定义配置
+
