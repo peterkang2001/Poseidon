@@ -23,8 +23,8 @@ class Test_file_exists:
         """
         current_dir = os.getcwd()
         _target_file = os.path.join(current_dir, 'not_exists.py')
-        with pytest.raises(FileNotFoundException):
-            file_is_exists(_target_file)
+        assert not file_is_exists(_target_file)
+
 
     def test_directory_is_exists(self):
         """
@@ -39,9 +39,4 @@ class Test_file_exists:
         """
         current_dir = os.getcwd()
         _target_dir = os.path.join(current_dir, "hello")
-        with pytest.raises(DirectoryNotFoundException):
-            dir_is_exists(_target_dir)
-
-
-
-
+        assert not dir_is_exists(_target_dir)

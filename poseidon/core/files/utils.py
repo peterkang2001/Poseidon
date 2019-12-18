@@ -6,19 +6,19 @@
 """
 import os
 import sys
-from poseidon.core.exceptions import *
+from poseidon.core.files import utils
 
 def dir_is_exists(path):
     if os.path.exists(path):
         return True
     else:
-        raise DirectoryNotFoundException()
+        return False
 
 def file_is_exists(path):
     if os.path.exists(path):
         return True
     else:
-        raise FileNotFoundException()
+        return False
 
 
 def get_project_path_info():
@@ -31,3 +31,15 @@ def get_project_path_info():
     _project_path = os.path.dirname(_poseidon_path)
     return {"project_path": _project_path,
             "poseidon_path": _poseidon_path}
+
+
+def chdir_to_project():
+    """切换工作目录到git项目根目录"""
+    try:
+        _home = utils.get_project_path_info().get("project_path")
+        os.chdir(_home)
+        sys.stdout.write("切换工作目录到{}\n".format(_home))
+        return True
+    except Exception as e:
+        sys.stderr.write("{}\n".format(e))
+        return False
