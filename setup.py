@@ -21,7 +21,7 @@ with open('README.md', 'r', encoding='utf-8') as rd:
 
 setup(
     name="Poseidon",# 项目名称，保证它的唯一性，不要跟已存在的包名冲突即可
-    version="0.0.3",   # 版本
+    version="0.0.5",   # 版本
     author="Poseidon Software Foundation", # 项目作者
     author_email="foundation@poseidon.com",
     description="基于Python技术栈的自动化测试框架", # 项目的一句话描述
@@ -36,7 +36,7 @@ setup(
     },
     packages=find_packages(exclude=['scripts', 'tests']),
     package_data = {
-        '': ['*.ini', '*.py-tpl'],
+        '': ['*.ini', '*.py_tpl'],
     },
     install_requires=[
         "Click>=7.0",
