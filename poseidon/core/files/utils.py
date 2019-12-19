@@ -71,7 +71,14 @@ def mkdirs(path, model=None):
         return False
 
 
-def copy_tpl_tree(name, src):
-    _poseidon_path = get_project_path_info().get("poseidon_path")
-    _src_dir = _poseidon_path
-    _des_dir = os.path.join(name)
+def copy_tpl_tree(dest_path, target_dir):
+    _pip_local_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+    _src = os.path.join(_pip_local_path, 'template', target_dir)
+    print("来源地址{}".format(_src))
+    print("目的地址{}".format(dest_path))
+    try:
+        shutil.copytree(_src, dest_path)
+        output.info("脚手架创建 {} 完毕".format(target_dir))
+    except Exception as e:
+        output.err("脚手架创建 {} 失败".format(target_dir))
+        output.err(e)
