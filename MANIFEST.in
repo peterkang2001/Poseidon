@@ -1,8 +1,7 @@
 
 include *.md
 include LICENSE.txt
-recursive-include font *
-recursive-include Images *
-recursive-include sounds *
+include requirements.txt
+recursive-include poseidon/template *
 global-exclude __pycache__
 global-exclude *.py[co]
