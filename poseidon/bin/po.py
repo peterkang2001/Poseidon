@@ -15,8 +15,8 @@ def cli():
 @cli.command()
 @click.argument('name', default="mysite")
 def startproject(name):
-    """create test project by scaffold """
-    command_start(name)
+    """创建测试脚本的脚手架命令 """
+    command_start(project_name=name)
 
 
 
