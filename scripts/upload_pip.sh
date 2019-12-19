@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
-# 需要在上传pip包的计算机中边际  ~/.pypirc
-# 设置如下用户名密码
+# 第1步: 需要在上传pip包的计算机中编辑  ~/.pypirc
 #[pypi]
 #repository=https://pypi.python.org/pypi
 #username=xxxx
 #password=xxx
+
+# 第2步 安装 pip install twine
+# 第3步 上传
 python setup.py check &&
-python setup.py sdist upload -r pypi
+twine upload dist/Poseidon-test*.tar.gz
