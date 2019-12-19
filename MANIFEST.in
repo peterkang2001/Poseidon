@@ -4,3 +4,5 @@ include LICENSE.txt
 recursive-include font *
 recursive-include Images *
 recursive-include sounds *
+global-exclude __pycache__
+global-exclude *.py[co]
