@@ -20,8 +20,8 @@ with open('README.md', 'r', encoding='utf-8') as rd:
 
 
 setup(
-    name="Poseidon",# 项目名称，保证它的唯一性，不要跟已存在的包名冲突即可
-    version="0.0.5",   # 版本
+    name="Poseidon-test",  # 项目名称，保证它的唯一性，不要跟已存在的包名冲突即可
+    version="0.0.1",  # 版本
     author="Poseidon Software Foundation", # 项目作者
     author_email="foundation@poseidon.com",
     description="基于Python技术栈的自动化测试框架", # 项目的一句话描述
@@ -40,17 +40,17 @@ setup(
     },
     install_requires=[
         "Click>=7.0",
-        "pytest>=5.3.1",
-        "pytest-html>=2.0.1",
-        "pytest-testconfig",
-        "request",
-        "pytest-json",
-        "pytest-selenium",
-        "SQLAlchemy",
-        "pyDes",
-        "pymemcache",
-        "redis",
-        "requests_toolbelt"
+        # "pytest>=5.3.1",
+        # "pytest-html>=2.0.1",
+        # "pytest-testconfig",
+        # "request",
+        # "pytest-json",
+        # "pytest-selenium",
+        # "SQLAlchemy",
+        # "pyDes",
+        # "pymemcache",
+        # "redis",
+        # "requests_toolbelt"
     ],
 
     classifiers=[
