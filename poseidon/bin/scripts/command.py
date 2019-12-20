@@ -21,8 +21,8 @@ def command_start(project_name):
 
         # 复制项目文件
         utils.copy_tpl_tree(dest_path=_project_path, target_dir='business')
-        utils.copy_tpl_tree(dest_path=_project_path, target_dir='data')
-        utils.copy_tpl_tree(dest_path=_project_path, target_dir='testcase')
+        # utils.copy_tpl_tree(dest_path=_project_path, target_dir='data')
+        # utils.copy_tpl_tree(dest_path=_project_path, target_dir='testcase')
     else:
         output.err("创建目录 {} 失败: 该目录已存在".format(project_name))
         return 1
