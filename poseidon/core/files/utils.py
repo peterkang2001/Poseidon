@@ -5,9 +5,10 @@
    date:         2019-12-17
 """
 import os
+import shutil
 from poseidon.core.files import utils
 from poseidon.core import output
-import shutil
+
 
 def dir_is_exists(path):
     if os.path.exists(path):
@@ -74,11 +75,28 @@ def mkdirs(path, model=None):
 def copy_tpl_tree(dest_path, target_dir):
     _pip_local_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
     _src = os.path.join(_pip_local_path, 'template', target_dir)
-    print("来源地址{}".format(_src))
-    print("目的地址{}".format(dest_path))
+
+    dest_path = os.path.join(dest_path, target_dir)
+    # print("来源地址{}".format(_src))
+    # print("目的地址{}".format(dest_path))
     try:
-        shutil.copytree(_src, dest_path)
+        shutil.copytree(_src, dest_path, ignore=shutil.ignore_patterns('__pycache__'))
         output.info("脚手架创建 {} 完毕".format(target_dir))
     except Exception as e:
         output.err("脚手架创建 {} 失败".format(target_dir))
+        output.err(e)
+
+
+def copy_tpl_file(dest_path, file):
+    _pip_local_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+    _src_file = os.path.join(_pip_local_path, 'template', file)
+    _dest_file = os.path.join(dest_path, file)
+
+    # print("来源文件地址{}".format(_src_file))
+    # print("目标文件地址{}".format(_dest_file))
+    try:
+        shutil.copyfile(_src_file, _dest_file)
+        output.info("脚手架创建 {} 完毕".format(_dest_file))
+    except Exception as e:
+        output.err("脚手架创建 {} 失败".format(_dest_file))
         output.err(e)
