@@ -23,7 +23,7 @@ def command_start(project_name):
         utils.copy_tpl_tree(dest_path=_project_path, target_dir='data')
         utils.copy_tpl_tree(dest_path=_project_path, target_dir='testcase')
         # 复制模板文件
-        utils.copy_tpl_file(dest_path=_project_path, file='pytest.ini')
+        utils.copy_tpl_file(dest_path=_project_path, file='pytest.ini_aa')
         utils.copy_tpl_file(dest_path=_project_path, file='.editorconfig')
         utils.copy_tpl_file(dest_path=_project_path, file='.gitignore')
         utils.copy_tpl_file(dest_path=_project_path, file='requirements.txt')
