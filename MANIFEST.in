@@ -5,3 +5,5 @@ include requirements.txt
 recursive-include poseidon/template *
 global-exclude __pycache__
 global-exclude *.py[co]
+graft scripts
+graft tests

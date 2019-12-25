@@ -2,7 +2,7 @@
 
 """
 @author:songmengyun
-@file: data_base.py
+@file: data_api.py
 @time: 2019/12/17
 
 """
@@ -18,10 +18,14 @@ class DataBase():
     def url(self):
         return cb.get_value_from_env_data_dict(
             {
-                Env.qa: 'http://qa.wwww.demo.com',
-                Env.yz: 'http://yz.wwww.demo.com',
-                Env.prod: 'http://wwww.demo.com'
+                Env.qa: 'https://api.apiopen.top/searchMusic',
+                Env.yz: 'https://api.apiopen.top/searchMusic',
+                Env.prod: 'https://api.apiopen.top/searchMusic'
             })
+
+
+
+
 
 
 data_base = DataBase()
