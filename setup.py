@@ -10,7 +10,9 @@
 
 
 from setuptools import setup, find_packages
+from poseidon.core.version import update_set_cfg_version
 
+update_set_cfg_version()
 setup()
 
 

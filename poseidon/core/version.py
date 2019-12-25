@@ -70,7 +70,15 @@ def get_new_version(version_type=Types.Revision, step=1, suffix=None):
     return _new_version
 
 
+def update_init(version):
+    _project_path = Path(utils.get_project_path_info().get("poseidon_path"))
+    _init_path = _project_path.joinpath('__init__.py')
+    with open(_init_path, 'w') as f:
+        f.write("__version__ = '{}'".format(version))
+
 def update_set_cfg_version():
     _setup_cfg_path = get_setup_cfg_handler()
-    ini_file.update_ini_info(_setup_cfg_path, "metadata", "version",
-                             get_new_version(suffix=Types.Alpha))
+    _new_version = get_new_version()
+    ini_file.update_ini_info(_setup_cfg_path, "metadata", "version", _new_version)
+    # 更新poseidon目录中的__init__.py文件
+    update_init(_new_version)

@@ -114,3 +114,4 @@ class TestPathInfo:
         _suffix = get_new_version(suffix=Types.PRE)
         _suffix = _suffix.split("_")[-1]
         assert _suffix == Types.PRE.name
+
