@@ -8,4 +8,7 @@
 # 第2步 安装 pip install twine
 # 第3步 上传
 python setup.py check &&
-twine upload dist/Poseidon-test*.tar.gz
+twine register dist/Poseidon-test-0.0.2.tar.gz
+twine upload --repository pypi dist/Poseidon-test-0.0.2.tar.gz
+
+twine upload dist/Poseidon-test-0.0.2.tar.gz

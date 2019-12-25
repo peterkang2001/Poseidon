@@ -19,6 +19,13 @@ def startproject(name):
     command_start(project_name=name)
 
 
+@cli.command()
+@click.argument('type', default="docker")
+@click.option('-w')
+@click.option('--case')
+def run(type, w, case):
+    """在容器中运行脚本"""
+    pass
 
 if __name__ == '__main__':
     cli()
