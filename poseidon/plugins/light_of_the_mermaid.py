@@ -7,7 +7,6 @@ from datetime import datetime
 import pytest
 import logging
 from pytest_testconfig import config as pyconfig
-from poseidon.base.MonitorAlert import MonitorAlert
 from poseidon.base.SendMail import SendMail
 
 
@@ -45,29 +44,24 @@ def pytest_runtest_setup(item):
     logging.info("执行用例{nodeid}:{desc}".format(nodeid=item.nodeid,
                                               desc=_msg.strip()))
 
-def pytest_terminal_summary(terminalreporter):
+def pytest_terminal_summary():
     '''
-    :param terminalreporter:
-    :return: 1:自动发送测试报告 2:自动发送巡检报警
+    :return: 1:通过邮件发送测试报告
     '''
-    xj = MonitorAlert()
-    _section_report = pyconfig["sections"].get('report', None)
-    json_report_dict = xj._read_json_file(pyconfig['logfile'].get('json'))
-    html_path = pyconfig['logfile'].get('html')
-    monitor = True if 'monitor' in pyconfig else False
-    url = xj._get_xunjian_html_report_path(html_path, monitor) # 点击跳转的链接
-    item_name = pyconfig['rootdir'].split('/')[-1]
-    # metric = _section_report.get('metric', None)
-    if 'receivers' in _section_report:
-        # 发送测试报告
-        receivers = _section_report['receivers']
-        receivers = receivers.strip('[').strip(']').strip().split(',')
-        header = "质量管理平台"
 
-        subject = '%s自动化测试报告'%(item_name)
-        send_mail = SendMail(receivers, header, subject, url)
-        mail_msg = send_mail.html_report(subject, json_report_dict)
-        send_mail.send_mail(mail_msg)
-
-    # 发送巡检报警
-    xj.send_wx_warning(url, json_report_dict, monitor, metric=item_name)
+    _section_mail = pyconfig["mail"]
+    if _section_mail:
+        _sender = _section_mail.get('sender')
+        _receiver = _section_mail.get('receiver')
+        _receiver = _receiver.split(',')
+        _smtp_server = _section_mail.get('smtp_server')
+        _smtp_port = _section_mail.get('smtp_port')
+        _mail_user = _section_mail.get('mail_user')
+        _mail_pwd = _section_mail.get('mail_pwd')
+        _item_name = pyconfig['rootdir'].split('/')[-1]
+        _mail_title = f'{_item_name}自动化测试报告'
+        send_mail_object = SendMail(sender=_sender, receiver=_receiver, mail_title=_mail_title,
+                 smtp_server=_smtp_server, smtp_port=int(_smtp_port))
+        send_mail_object.send_mail()
+    else:
+        logging.info('若需发送邮件，请在pytest.ini中配置邮件信息')
