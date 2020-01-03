@@ -11,4 +11,4 @@
 ![image1](images/db_2.png)
 
 <br/>
-![image2](docs/images/db_1.png)
+![image2](images/db_1.png)

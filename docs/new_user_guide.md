@@ -2,7 +2,6 @@
 
 - [创建一个新的测试项目](create_project.md)
 - [如何在测试用例中访问数据库](use_db_explain.md)
-- [普通用户拿到git权限后该做些什么](use_step1.md)
 - [如何编写API测试脚本](api_explain.md)
 - [如何编写UI测试脚本](ui_explain.md)
 - [mac用户安装mysqlclient 错误1](mysqlclient.md)
