@@ -18,7 +18,7 @@
 * 流程说明
 * [参考文档](docs/reference.md)
 * releaselog
-* 版本规划
+* [版本规划](https://shimo.im/sheets/5JN0UZ8OpB43ZVnL/MODOC)
 * 其他
 
 
