@@ -8,7 +8,7 @@
 -  在data目录下的.py文件，保存数据库连接字符串的配置
 -  在poseidon/base/SqlAlchemySession.py 有建立数据库连接的公共方法
 
-![image1](docs/images/db_2.png)
+![image1](images/db_2.png)
 
 <br/>
 ![image2](docs/images/db_1.png)
