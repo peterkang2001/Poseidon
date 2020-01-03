@@ -14,8 +14,7 @@
 ## 内容
 * 安装
 * 新手指南
-* 框架目录结构说明
-* 流程说明
+* [框架目录结构说明](docs/directory_explain.md)
 * [参考文档](docs/reference.md)
 * [release log](docs/releaselog.md)
 * [版本规划(需要另外申请权限)](https://shimo.im/sheets/5JN0UZ8OpB43ZVnL/MODOC)
