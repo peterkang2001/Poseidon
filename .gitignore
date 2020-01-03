@@ -131,3 +131,5 @@ dmypy.json
 # 自定义配置
 .idea/
 logs/
+.DS_Store
+
