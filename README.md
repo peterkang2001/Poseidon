@@ -17,8 +17,8 @@
 * 框架目录结构说明
 * 流程说明
 * [参考文档](docs/reference.md)
-* [releaselog](docs/releaselog.md)
-* [版本规划(需要申请权限)](https://shimo.im/sheets/5JN0UZ8OpB43ZVnL/MODOC)
+* [release log](docs/releaselog.md)
+* [版本规划(需要另外申请权限)](https://shimo.im/sheets/5JN0UZ8OpB43ZVnL/MODOC)
 * [其他](docs/others.md)
 
 
