@@ -1,7 +1,7 @@
 import pytest
 from pytest_testconfig import config as pyconfig
 import poseidon.base.CommonBase as cb
-from selenium import webdriver
+
 
 
 def pytest_cmdline_preparse(config, args):
@@ -12,6 +12,9 @@ def pytest_cmdline_preparse(config, args):
     _section_extra = pyconfig["sections"].get('extra', None)
     _section_report = pyconfig["sections"].get('report', None)
     _section_mail = pyconfig['sections'].get('mail', None)
+    _section_mobile = pyconfig['sections'].get('mobile', None)
+    pyconfig['mail'] = _section_mail
+    pyconfig['mobile'] = _section_mobile
 
     # 设置各种格式的日志
     if _section_report.get("html").strip().lower() == "true":
@@ -51,9 +54,6 @@ def pytest_cmdline_preparse(config, args):
             arg_item = _cmdline_args_item.split('=')
             pyconfig['driver'] = arg_item[-1]
 
-        pyconfig['mail'] = _section_mail
-
-
 def pytest_addoption(parser):
     # 自动产生日志文件
     pyconfig["rootdir"] = parser._anonymous.parser.extra_info['rootdir'].strpath
@@ -65,7 +65,6 @@ def pytest_addoption(parser):
         help="测试环境输入项 如qa、yz、prod 可参考poseidon/base/Env.py")
     parser.addoption("--frequency", action="store", default='five_min',
         help="执行间隔输入项 如one_min、five_min、one_hour、one_day、one_day 可参考poseidon/base/Frequency.py")
-
 
 def pytest_collection_modifyitems(session, config, items):
     """
@@ -92,16 +91,49 @@ def pytest_collection_modifyitems(session, config, items):
                 skip_mark = pytest.mark.skip("因为frequency参数不是: %s" % (_filter_frequency))
                 item.add_marker(skip_mark)
 
-
 @pytest.fixture(scope='class')
-def driver_headless(pytestconfig):
+def driver_headless():
 
     if 'driver' in pyconfig and pyconfig['driver'].strip().lower() == 'chrome':
+        from selenium import webdriver
         options = webdriver.ChromeOptions()  # option对象
         options.add_argument('headless')  # 给option添加属性
         driver = webdriver.Chrome(options=options)
         return driver
     else:
         print('该浏览器不支持无头')
+
+@pytest.fixture(scope='function')
+def driver_android():
+
+    if 'mobile' in pyconfig:
+
+        mobile_info = pyconfig.get('mobile')
+        platformName = mobile_info.get('platformName', None)
+        platformVersion = mobile_info.get('platformVersion', None)
+        deviceName = mobile_info.get('deviceName', None)
+        appPackage = mobile_info.get('appPackage', None)
+        appActivity = mobile_info.get('appActivity', None)
+
+        desired_caps = dict()  # 初始化字典
+        desired_caps['platformName'] = platformName  # 需要连接平台名称，不区分大小写
+        desired_caps['platformVersion'] = platformVersion  # 平台的版本[5.4.3/5.4/5]
+        desired_caps['deviceName'] = deviceName  # 设备的名称，随便写，但不能为空
+        desired_caps['appPackage'] = appPackage  # 需要打开的应用名称，可通过 adb shell dumpsys window windows | grep mFocusedApp 获取
+        desired_caps['appActivity'] = appActivity  # 需要打开的界面名称
+
+        if 'command_executor' in mobile_info.keys():
+            command_executor = mobile_info.get('command_executor')
+        else:
+            command_executor = 'http://localhost:4723/wd/hub'
+
+        from appium import webdriver
+        driver = webdriver.Remote(command_executor, desired_caps)
+        print(f'starting launch {deviceName} - {appPackage} - {appActivity}'.center(50, '#'))
+        return driver
+
+    else:
+        print('请在pytest.ini中配置设备信息')
+
 
 
