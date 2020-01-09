@@ -51,17 +51,16 @@ def pytest_terminal_summary():
 
     _section_mail = pyconfig["mail"]
     if _section_mail:
-        _sender = _section_mail.get('sender')
-        _receiver = _section_mail.get('receiver')
-        _receiver = _receiver.split(',')
-        _smtp_server = _section_mail.get('smtp_server')
-        _smtp_port = _section_mail.get('smtp_port')
-        _mail_user = _section_mail.get('mail_user')
-        _mail_pwd = _section_mail.get('mail_pwd')
-        _item_name = pyconfig['rootdir'].split('/')[-1]
-        _mail_title = f'{_item_name}自动化测试报告'
-        send_mail_object = SendMail(sender=_sender, receiver=_receiver, mail_title=_mail_title,
-                 smtp_server=_smtp_server, smtp_port=int(_smtp_port))
-        send_mail_object.send_mail()
-    else:
-        logging.info('若需发送邮件，请在pytest.ini中配置邮件信息')
+        _sender = _section_mail.get('sender', None)
+        _receiver = _section_mail.get('receiver', None)
+        if _receiver:
+            _receiver = _receiver.split(',')
+            _smtp_server = _section_mail.get('smtp_server')
+            _smtp_port = _section_mail.get('smtp_port')
+            _mail_user = _section_mail.get('mail_user')
+            _mail_pwd = _section_mail.get('mail_pwd')
+            _item_name = pyconfig['rootdir'].split('/')[-1]
+            _mail_title = f'{_item_name}自动化测试报告'
+            send_mail_object = SendMail(sender=_sender, receiver=_receiver, mail_title=_mail_title,
+                     smtp_server=_smtp_server, smtp_port=int(_smtp_port))
+            send_mail_object.send_mail()

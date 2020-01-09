@@ -57,7 +57,7 @@ class SendMail():
 
         try:
             smtpObj = smtplib.SMTP(self.smtp_server, self.smtp_port)
-            smtpObj.set_debuglevel(1)
+            # smtpObj.set_debuglevel(1)
             smtpObj.sendmail(self.sender , receivers , message.as_string())
             logging.info("邮件发送成功")
         except smtplib.SMTPException as e:

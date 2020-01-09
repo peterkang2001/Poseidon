@@ -5,9 +5,8 @@
    date:         2019-06-04
 """
 import logging
-from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
-from poseidon.ui.pc.location import *
+from poseidon.ui.util.location import *
 import time
 # from poseidon.base.log_level import Level
 

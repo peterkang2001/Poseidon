@@ -25,6 +25,7 @@ from datetime import datetime, timedelta
 import pyDes
 import copy
 import yaml
+import functools
 from poseidon.base.Files import Files
 
 # region Data conversion and search methods
@@ -170,7 +171,7 @@ def convertStrTimeToDateTime(strTime, formatD='%Y-%m-%dT%H:%M:%S'):
         :param formatD: string, date time format
     '''
     try:
-        date = datetime.datetime.strptime(strTime, formatD)
+        date = datetime.strptime(strTime, formatD)
         return date
     except:
         assert False, "strTime: %s, format: %s" % (strTime, formatD)
@@ -381,9 +382,9 @@ def checkListEqual(actList, expList):
 
 def checkTwoDicts(bodyData, expected_data):
     '''
-        check two dict is equal or not
-        :param dict bodyData
-        :param dict expected_data
+    check two dict is equal or not
+    :param dict bodyData
+    :param dict expected_data
     '''
     logging.info("Check the dict %s is as expected as dict %s" % (json.dumps(bodyData, ensure_ascii=False),
                                                                  json.dumps(expected_data, ensure_ascii=False),))
@@ -391,7 +392,7 @@ def checkTwoDicts(bodyData, expected_data):
     msg = "the json message should be %s , but the actual is: %s" \
           % (json.dumps(expected_data, ensure_ascii=False), json.dumps(bodyData, ensure_ascii=False))
     if not bodyData == expected_data:
-        logging.assertErr(False, msg)
+        logging.error(False, msg)
 
 
 def checkValueInDict(dict, name, expected, msg=None):
@@ -833,10 +834,8 @@ def getValueInDict(dict, name, msg=None):
         except:
             if msg is None:
                 msg = "Cannot find the key '%s' in dict %s" % (item, str(dict))
-            logging.assertErr(False, msg)
+            logging.error(False, msg)
     return dict
-
-
 
 
 def get_value_from_env_data_dict(data_dict, env_map_dict=None, use_default_mapping=False):
@@ -865,27 +864,6 @@ def get_value_from_env_data_dict(data_dict, env_map_dict=None, use_default_mappi
         }[cur_env]
     return getValue(data_dict, cur_env)
 
-
-def getValue(source, name, msg=None):
-    '''
-        get dict key-value
-        :param dict source
-        :param string name: dict key
-        :return string/int/boolean value: dict value
-    '''
-    try:
-        valueMsg = "Not found (%s) in source %s" % (name, source)
-        value = source.get(name, valueMsg)
-        if value == valueMsg:
-            logging.error(valueMsg)
-            assert False, valueMsg
-    except:
-        if msg == None:
-            msg = "cannot found name %s in source %s" % (name, source)
-        logging.error(msg)
-        assert False, msg
-
-    return value
 
 def getUserName():
     '''
@@ -1211,7 +1189,7 @@ def getRandomParameterizedValues(randCount, *args, **kwargs):
     for arg in args:
         iCount *= len(arg)
     if randCount > iCount:
-        logging.assertErr(False, 'randCount %d cannot be larger than possible count %d' % (randCount, iCount))
+        logging.error(False, 'randCount %d cannot be larger than possible count %d' % (randCount, iCount))
 
     while len(paraValues) < randCount:
         paraValue = []
@@ -1376,6 +1354,44 @@ def get_log_path_forPytest():
 
 
 #endregion
+
+# region decorate
+
+def com_try_catch(func):
+    '''装饰器，添加try...catch'''
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        logging.info(func.__name__ + " was called")
+        try:
+            f = func(*args, **kwargs)
+            return f
+        except Exception as e:
+            raise e
+
+    return wrapper  # 返回
+
+def try_conn(n):
+    '''装饰器，作用于数据库查询调用，尝试重连n次'''
+    def my_decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            global f
+            for i in range(0, n):
+                logging.info(f'第{i+1}次尝试'.center(50, '*'))
+                bContinue = False
+                try:
+                    f = func(*args, **kwargs)
+                    if f: bContinue = True
+                except Exception as e:
+                    print("[Conn Exception] {0}: {1}".format(type(e), e))
+                    bContinue = False
+                finally:
+                    if bContinue: return f
+        return wrapper
+    return my_decorator
+
+# endregion
 
 
 # regigon 环境判断

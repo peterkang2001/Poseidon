@@ -1,4 +1,5 @@
 import pytest
+import logging
 from pytest_testconfig import config as pyconfig
 import poseidon.base.CommonBase as cb
 
@@ -106,34 +107,22 @@ def driver_headless():
 @pytest.fixture(scope='function')
 def driver_android():
 
-    if 'mobile' in pyconfig:
+    from poseidon.ui.mobile.android.init_driver import get_desired_caps
 
-        mobile_info = pyconfig.get('mobile')
-        platformName = mobile_info.get('platformName', None)
-        platformVersion = mobile_info.get('platformVersion', None)
-        deviceName = mobile_info.get('deviceName', None)
-        appPackage = mobile_info.get('appPackage', None)
-        appActivity = mobile_info.get('appActivity', None)
+    _desired_caps = get_desired_caps()
+    if not 'newCommandTimeout' in _desired_caps:
+        _desired_caps['newCommandTimeout'] = 60
 
-        desired_caps = dict()  # 初始化字典
-        desired_caps['platformName'] = platformName  # 需要连接平台名称，不区分大小写
-        desired_caps['platformVersion'] = platformVersion  # 平台的版本[5.4.3/5.4/5]
-        desired_caps['deviceName'] = deviceName  # 设备的名称，随便写，但不能为空
-        desired_caps['appPackage'] = appPackage  # 需要打开的应用名称，可通过 adb shell dumpsys window windows | grep mFocusedApp 获取
-        desired_caps['appActivity'] = appActivity  # 需要打开的界面名称
-
-        if 'command_executor' in mobile_info.keys():
-            command_executor = mobile_info.get('command_executor')
-        else:
-            command_executor = 'http://localhost:4723/wd/hub'
-
-        from appium import webdriver
-        driver = webdriver.Remote(command_executor, desired_caps)
-        print(f'starting launch {deviceName} - {appPackage} - {appActivity}'.center(50, '#'))
-        return driver
-
+    if 'command_executor' in _desired_caps:
+        _com_executor = _desired_caps.pop('command_executor')
     else:
-        print('请在pytest.ini中配置设备信息')
+        _com_executor = 'http://localhost:4723/wd/hub'
 
+    from appium import webdriver
+    driver = webdriver.Remote(_com_executor, _desired_caps)
+    logging.info(f'starting launch {_desired_caps}'.center(50, '#'))
 
+    yield driver
 
+    logging.info(f'ending {_desired_caps}'.center(50, '#'))
+    driver.quit()

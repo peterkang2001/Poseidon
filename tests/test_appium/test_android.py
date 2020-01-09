@@ -17,7 +17,7 @@ from appium.webdriver.connectiontype import ConnectionType
 
 from collections import namedtuple
 from poseidon.ui.mobile.android.init_driver import init_driver
-
+from tests.business.pages.search_page import Search_Page
 
 
 '''
@@ -31,7 +31,6 @@ Android 6.0
 cctalk登录页面：com.hujiang.cctalk/com.hujiang.browser.view.X5HJWebViewActivity
 安智市场：cn.goapk.market/com.anzhi.market.ui.MainActivity
 京东：com.jingdong.app.mall/.main.MainActivity
-
 
 '''
 
@@ -60,45 +59,43 @@ class TestAndroid:
     def setup_method(self, method):
         """ 所有case初始化操作 """
         logging.info('setup_method'.center(50, '*'))
-        self.driver = init_driver('Android', '6.0', '192.168.57.103:5555', 'com.android.settings', '.Settings',
-                                  command_executor='http://localhost:4723/wd/hub')
+        desired_caps = {
+            'platformName': 'Android',
+            'deviceName': '192.168.57.103:5555',
+            'platformVersion': '6.0',
+            'appPackage': 'com.android.settings',
+            'appActivity': '.Settings',
+            'newCommandTimeout': '120',
+            'noSign': 'True'
+        }
+        self.driver = init_driver(desired_caps, command_executor='http://localhost:4723/wd/hub')
 
     def teardown_method(self, method):
         logging.info('teardown_method'.center(50, '*'))
         self.driver.quit()
 
 
-    def test_android(self):
-        '''打开其他app'''
+    def test_start_activity(self):
+        '''打开其他app： setup/teardown'''
 
         time.sleep(3)
         self.driver.start_activity(self.app_mis.appPackage, self.app_mis.appActivity)
 
-    def test_ini(self, driver_android):
-        '''test fixture'''
-
-        time.sleep(3)
-        driver_android.start_activity(self.app_mis.appPackage, self.app_mis.appActivity)
-        driver_android.quit()
-
     def test_get_package_activity(self):
         '''获取当前程序包名和界面名'''
 
-        desired_caps = dict()    # 初始化字典
-        desired_caps['platformName'] = self.device_and_6.platformName   # 需要连接平台名称，不区分大小写
-        desired_caps['platformVersion'] = self.device_and_6.platformVersion   # 平台的版本[5.4.3/5.4/5]
-        desired_caps['deviceName'] = self.device_and_6.deviceName   # 设备的名称，随便写，但不能为空
-        desired_caps['appPackage'] = self.app_setting.appPackage  # 需要打开的应用名称，可通过 adb shell dumpsys window windows | grep mFocusedApp 获取
-        desired_caps['appActivity'] = self.app_setting.appActivity  # 需要打开的界面名称
-
-        driver = webdriver.Remote('http://localhost:4723/wd/hub', desired_caps)
         time.sleep(3)
-
         # 输出当前程序包名和界面名
-        print(driver.current_package)
-        print(driver.current_activity)
+        print(self.driver.current_package)
+        print(self.driver.current_activity)
 
         # 切换到短信页面
+        desired_caps = dict()  # 初始化字典
+        desired_caps['platformName'] = self.device_and_6.platformName  # 需要连接平台名称，不区分大小写
+        desired_caps['platformVersion'] = self.device_and_6.platformVersion  # 平台的版本[5.4.3/5.4/5]
+        desired_caps['deviceName'] = self.device_and_6.deviceName  # 设备的名称，随便写，但不能为空
+        desired_caps['appPackage'] = self.app_mis.appPackage  # 需要打开的应用名称，可通过 adb shell dumpsys window windows | grep mFocusedApp 获取
+        desired_caps['appActivity'] = self.app_mis.appActivity  # 需要打开的界面名称
         driver = webdriver.Remote('http://localhost:4723/wd/hub', desired_caps)
         time.sleep(3)
 
@@ -106,28 +103,18 @@ class TestAndroid:
         print(driver.current_package)
         print(driver.current_activity)
 
-        driver.quit()
-
     def test_close_quit_app(self):
         '''关闭当前app/关闭驱动'''
 
-        desired_caps = dict()    # 初始化字典
-        desired_caps['platformName'] = self.device_and_6.platformName   # 需要连接平台名称，不区分大小写
-        desired_caps['platformVersion'] = self.device_and_6.platformVersion   # 平台的版本[5.4.3/5.4/5]
-        desired_caps['deviceName'] = self.device_and_6.deviceName   # 设备的名称，随便写，但不能为空
-        desired_caps['appPackage'] = self.app_setting.appPackage  # 需要打开的应用名称，可通过 adb shell dumpsys window windows | grep mFocusedApp 获取
-        desired_caps['appActivity'] = self.app_setting.appActivity  # 需要打开的界面名称
-
-        driver = webdriver.Remote('http://localhost:4723/wd/hub', desired_caps)
         time.sleep(3)
 
-        driver.close_app()
-        print(driver.current_package)
-        print(driver.current_activity)
+        self.driver.close_app()
+        print(self.driver.current_package)
+        print(self.driver.current_activity)
 
-        driver.quit()
-        print(driver.current_package)
-        print(driver.current_activity)
+        self.driver.quit()
+        print(self.driver.current_package)
+        print(self.driver.current_activity)
 
     def test_install_uninstall_check(self):
         '''安装和卸载app'''
@@ -535,6 +522,8 @@ class TestAndroid:
         driver.press_keycode(4)
 
         driver.quit()
+
+        aaa = dict()
 
 
 
