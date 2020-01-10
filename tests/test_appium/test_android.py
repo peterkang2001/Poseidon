@@ -66,7 +66,7 @@ class TestAndroid:
             'appPackage': 'com.android.settings',
             'appActivity': '.Settings',
             'newCommandTimeout': '120',
-            'noSign': 'True'
+            'noSign': True
         }
         self.driver = init_driver(desired_caps, command_executor='http://localhost:4723/wd/hub')
 
@@ -108,13 +108,17 @@ class TestAndroid:
 
         time.sleep(3)
 
-        self.driver.close_app()
+        # self.driver.close_app()
         print(self.driver.current_package)
         print(self.driver.current_activity)
+        print(self.driver.context)
+        print(self.driver.contexts)
+        print(self.driver.current_context)
+        time.sleep(5)
 
-        self.driver.quit()
-        print(self.driver.current_package)
-        print(self.driver.current_activity)
+        # self.driver.quit()
+        # print(self.driver.current_package)
+        # print(self.driver.current_activity)
 
     def test_install_uninstall_check(self):
         '''安装和卸载app'''
@@ -480,28 +484,17 @@ class TestAndroid:
     def test_press_keycode(self):
         '''发送键到设备：模拟按返回/home键等等操作，'''
 
-        desired_caps = dict()  # 初始化字典
-        desired_caps['platformName'] = self.device_and_6.platformName  # 需要连接平台名称，不区分大小写
-        desired_caps['platformVersion'] = self.device_and_6.platformVersion  # 平台的版本[5.4.3/5.4/5]
-        desired_caps['deviceName'] = self.device_and_6.deviceName  # 设备的名称，随便写，但不能为空
-        desired_caps['appPackage'] = self.app_setting.appPackage  # 需要打开的应用名称
-        desired_caps['appActivity'] = self.app_setting.appActivity  # 需要打开的界面名称
-
-        driver = webdriver.Remote('http://localhost:4723/wd/hub', desired_caps)
-
         # 点击三次音量加键
-        driver.press_keycode(24)
-        driver.press_keycode(24)
-        driver.press_keycode(24)
+        self.driver.press_keycode(24)
+        self.driver.press_keycode(24)
+        self.driver.press_keycode(24)
 
         # 再点击返回
-        driver.press_keycode(4)
+        self.driver.press_keycode(4)
 
         # 再点击两次音量减
-        driver.press_keycode(25)
-        driver.press_keycode(25)
-
-        driver.quit()
+        self.driver.press_keycode(25)
+        self.driver.press_keycode(25)
 
     def test_open_notifications(self):
         '''操作手机通知栏'''

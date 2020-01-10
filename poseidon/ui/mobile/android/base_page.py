@@ -11,10 +11,15 @@ import time
 import logging
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.by import By
+from appium.webdriver.common.touch_action import TouchAction
+from selenium.webdriver.support.wait import WebDriverWait
+from appium.webdriver.connectiontype import ConnectionType
 from poseidon.ui.util.location import *
 from poseidon.base import CommonBase as cb
+from poseidon.ui.mobile.android.android_keycode import KEYCODE
 
 class Swipe:
+    '''滚动屏幕相关'''
 
     def __init__(self, driver):
         self.driver = driver
@@ -73,10 +78,13 @@ class Swipe:
             time.sleep(3)
             self.driver.swipe(x1, y1, x2, y1)
 
+
 class Action:
+    '''操作手机通知栏/获取元素'''
 
     def __init__(self, driver):
         self.driver = driver
+        self.action = TouchAction(self.driver)
 
     def get_element(self, locator):
         """
@@ -167,30 +175,92 @@ class Action:
 
         return elements
 
+    def set_touch_pwd(self, locator):
+        '''
+        设置手势解锁
+        :param locator: 获取第一个触摸点的坐标location及size
+        :return:
+        '''
+
+        action = TouchAction(self.driver)
+        start = self.get_element(locator)
+
+        # start = self.driver.find_element_by_xpath('//XCUIElementTypeApplication[@name="众安保险"]/XCUIElementTypeWindow[1]/XCUIElementTypeOther\
+        #                     /XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther[1]')
+
+        start_height = start.size['height']
+        start_width = start.size['width']
+        start_x = start.location['x']
+        start_y = start.location['y']
+        begin_x = start_x + start_width / 2
+        begin_y = start_y + start_height / 2
+
+        # action.press(x=179, y=630).move_to(x=539, y=630) \
+        #     .move_to(x=901, y=630).move_to(x=901, y=989) \
+        #     .move_to(x=542, y=989).move_to(x=901, y=1349).release().perform()
+
+        action.press(x=start_x, y=start_y).wait(100).move_to(x=start_x + start_width * 2, y=begin_y).wait(100).\
+            move_to(x=start_x + start_width * 2, y=start_y + start_height * 2).wait(100).\
+            move_to(x=begin_x, y=start_y + start_height * 2).release().perform()
+
+    def adjust_volume(self, size):
+        '''调节系统音量，变大或变小'''
+
+    def adjust_brightness(self, size):
+        '''调节屏幕亮度，变大或变小'''
+
+    def clean_notification_bar_message(self):
+        '''清空通知栏消息'''
+
+        self.driver.open_notifications()   # 打开下拉通知栏
+
+    def open_close_wifi(self):
+        '''打开/关闭Wi-Fi'''
+
+    def airplane_mode(self):
+        '''打开飞行模式'''
+
+class KeyEvent:
+    '''按键事件'''
+
+    def __init__(self, driver):
+        self.driver = driver
+
+    def volume(self, size:int) -> None:
+        '''按键系统音量变大或变小'''
+        if size >=0:
+            for i in range(0, size):
+                self.driver.press_keycode(KEYCODE.KEYCODE_VOLUME_UP)   # 音量大键
+        else:
+            for i in range(size, 0):
+                self.driver.press_keycode(KEYCODE.KEYCODE_VOLUME_DOWN)   # 音量小键
+        self.driver.press_keycode(KEYCODE.KEYCODE_BACK)   # 返回键
+
 class AssertBase:
+    '''断言相关'''
+
     def __init__(self, driver):
         self.driver = driver
 
     @cb.com_try_catch
     def check_current_activity(self, app_activity):
         '''验证当前activity是否登录传入app_activity'''
-        current_activity = self.driver.current_activity()
+        current_activity = self.driver.current_activity
         if current_activity:
             cb.checkEqual(current_activity, app_activity)
         else:
             logging.error('当前没有app_activity')
 
 
-
-
-class BasePage(Swipe, Action, AssertBase):
+class BasePage(Swipe, Action, KeyEvent, AssertBase):
+    '''其他通过方法'''
 
     def __init__(self, driver):
         self.driver = driver
         super().__init__(driver=self.driver)
 
     @cb.com_try_catch
-    def install_app(self, app_path, appPackage):
+    def install_app(self, app_path:str, appPackage:str):
         '''
         :param app_path: 安装包路径
         :param appPackage: 安装包包名
@@ -203,7 +273,7 @@ class BasePage(Swipe, Action, AssertBase):
             logging.info(f'{appPackage}安装成功')
 
     @cb.com_try_catch
-    def uninstall_app(self, appPackage):
+    def uninstall_app(self, appPackage:str):
         '''
         :param appPackage: 安装包包名
         :return: 先判断是否安装: 如果已安装，执行卸载
@@ -215,9 +285,9 @@ class BasePage(Swipe, Action, AssertBase):
             logging.info(f'{appPackage}已卸载')
 
     @cb.com_try_catch
-    def open_app(self, app_package, app_activity):
+    def open_app(self, app_package:str, app_activity:str) -> None:
         '''
-        :param app_package: 需要打开第应用名
+        :param app_package: 需要打开的应用名
         :param app_activity: 需要打开的界面
         :return: 在当前应用中打开一个activity或者启动一个新应用并打开一个 activity
         '''
@@ -254,8 +324,20 @@ class BasePage(Swipe, Action, AssertBase):
         '''收起键盘'''
         self.driver.hide_keyboard()
 
+    def shake_app(self):
+        '''模拟设备摇晃'''
+        self.driver.shake()
+
+    def get_content(self):
+        '''进入指定上下文'''
+        current_content = self.driver.current_context   # 列出当前上下文
+        current_contents = self.driver.contents   # 列出所有的可用上下文
+        return current_content
+
+
     @cb.com_try_catch
-    def backgroup_app(self, seconds, restart=True):
+    def backgroup_app(self, seconds:int, restart=True):
+        '''backgroup app seconds'''
         if restart == True:
             self.driver.background_app(seconds)
         else:
@@ -282,8 +364,8 @@ class BasePage(Swipe, Action, AssertBase):
         if is_button:
             element.click()
         else:
-            # f = self.driver.find_element(*locator)
-            ActionChains(self.driver).click(element).perform()
+            element = self.get_element(locator)
+            TouchAction(self.driver).tap(element).perform()
 
     def set_text(self, locator, values):
         """
