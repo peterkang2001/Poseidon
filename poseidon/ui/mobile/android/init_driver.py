@@ -13,6 +13,8 @@ from pytest_testconfig import config as pyconfig
 
 
 def get_desired_caps(desired_caps=None):
+    '''判断是否传入desired_caps，如果传入直接返回，如果不传入取pytest.ini中配置'''
+
     if desired_caps:
         return desired_caps
     else:

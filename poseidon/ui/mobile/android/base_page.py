@@ -182,23 +182,15 @@ class Action:
         :return:
         '''
 
-        action = TouchAction(self.driver)
         start = self.get_element(locator)
-
-        # start = self.driver.find_element_by_xpath('//XCUIElementTypeApplication[@name="众安保险"]/XCUIElementTypeWindow[1]/XCUIElementTypeOther\
-        #                     /XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther/XCUIElementTypeOther[1]')
-
-        start_height = start.size['height']
+        start_height = start.size['height']   #
         start_width = start.size['width']
         start_x = start.location['x']
         start_y = start.location['y']
         begin_x = start_x + start_width / 2
         begin_y = start_y + start_height / 2
 
-        # action.press(x=179, y=630).move_to(x=539, y=630) \
-        #     .move_to(x=901, y=630).move_to(x=901, y=989) \
-        #     .move_to(x=542, y=989).move_to(x=901, y=1349).release().perform()
-
+        action = TouchAction(self.driver)
         action.press(x=start_x, y=start_y).wait(100).move_to(x=start_x + start_width * 2, y=begin_y).wait(100).\
             move_to(x=start_x + start_width * 2, y=start_y + start_height * 2).wait(100).\
             move_to(x=begin_x, y=start_y + start_height * 2).release().perform()
@@ -260,29 +252,29 @@ class BasePage(Swipe, Action, KeyEvent, AssertBase):
         super().__init__(driver=self.driver)
 
     @cb.com_try_catch
-    def install_app(self, app_path:str, appPackage:str):
+    def install_app(self, app_path:str, app_package:str):
         '''
         :param app_path: 安装包路径
-        :param appPackage: 安装包包名
+        :param app_package: 安装包包名
         :return: 先判断是否安装: 如果未安装，则执行安装
         '''
-        if self.driver.is_app_installed(appPackage):
-            logging.info(f'{appPackage}已安装')
+        if self.driver.is_app_installed(app_package):
+            logging.info(f'{app_package}已安装')
         else:
             self.driver.install_app(app_path)
-            logging.info(f'{appPackage}安装成功')
+            logging.info(f'{app_package}安装成功')
 
     @cb.com_try_catch
-    def uninstall_app(self, appPackage:str):
+    def uninstall_app(self, app_package:str):
         '''
-        :param appPackage: 安装包包名
+        :param app_package: 安装包包名
         :return: 先判断是否安装: 如果已安装，执行卸载
         '''
-        if self.driver.is_app_installed(appPackage):
-            self.driver.remove_app(appPackage)
-            logging.info(f'{appPackage}卸载成功')
+        if self.driver.is_app_installed(app_package):
+            self.driver.remove_app(app_package)
+            logging.info(f'{app_package}卸载成功')
         else:
-            logging.info(f'{appPackage}已卸载')
+            logging.info(f'{app_package}已卸载')
 
     @cb.com_try_catch
     def open_app(self, app_package:str, app_activity:str) -> None:
@@ -381,15 +373,8 @@ class BasePage(Swipe, Action, KeyEvent, AssertBase):
         except Exception as msg:
             logging.error(msg)
 
-
-    def element_text(self):
-        pass
-
-    def scroll_screen(self):
-        pass
-
-    def touch_screen(self):
-        pass
+    def clean_app_cash(self,app_package):
+        '''清除app缓存'''
 
     def is_displayed(self, locator, mark=True):
         """
