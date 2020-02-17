@@ -17,7 +17,6 @@ from appium.webdriver.connectiontype import ConnectionType
 
 from collections import namedtuple
 from poseidon.ui.mobile.android.init_driver import init_driver
-from tests.business.pages.search_page import Search_Page
 
 
 '''
@@ -175,7 +174,7 @@ class TestAndroid:
         # 通过ID定位放大镜按钮，点击
         search_butoon = driver.find_element_by_id('com.android.settings:id/search')
         search_butoon.click()
-        # 通过CLASS定时输入框，输入at
+        # 通过CLASS定位输入框，输入at
         search_box = driver.find_element_by_class_name('android.widget.EditText')
         search_box.send_keys('at')
         # 通过XPATH定位返回按钮，点击

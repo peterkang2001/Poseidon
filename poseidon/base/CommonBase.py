@@ -1332,7 +1332,7 @@ def log_path():
     log_dir = Files.get_root()
     log_dir = os.path.join(log_dir , 'logs' , 'log_%s' % (time.strftime("%Y_%m_%d" , time.localtime())))
     # 因为考虑今后可能会在k8s上跑，增加随机数减少日志重名的可能
-    logName = "{0}_{1}_{2:0>2}.txt".format('case', time.strftime("%Y%m%d_%H%M%S", time.localtime()), randNumber(0,100))
+    logName = "{0}_{1}_{2:0>2}.txt".format('Report', time.strftime("%Y%m%d_%H%M%S", time.localtime()), randNumber(0,100))
     logAsbName = os.path.join(log_dir, logName)
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)

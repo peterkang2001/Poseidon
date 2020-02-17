@@ -5,6 +5,8 @@
    date:         2019-05-08
 """
 import socket
+import getpass
+
 class IP:
     @staticmethod
     def get_host_name():
@@ -12,7 +14,9 @@ class IP:
         查询本机hostname
         :return:
         """
-        return socket.gethostname()
+        user_name = getpass.getuser()  # 获取当前用户名
+        hostname = socket.gethostname()  # 获取当前主机名
+        return (user_name, hostname)
 
 
     @staticmethod

@@ -78,7 +78,6 @@ class Swipe:
             time.sleep(3)
             self.driver.swipe(x1, y1, x2, y1)
 
-
 class Action:
     '''操作手机通知栏/获取元素'''
 
@@ -243,7 +242,6 @@ class AssertBase:
         else:
             logging.error('当前没有app_activity')
 
-
 class BasePage(Swipe, Action, KeyEvent, AssertBase):
     '''其他通过方法'''
 
@@ -283,10 +281,9 @@ class BasePage(Swipe, Action, KeyEvent, AssertBase):
         :param app_activity: 需要打开的界面
         :return: 在当前应用中打开一个activity或者启动一个新应用并打开一个 activity
         '''
-        current_activity = self.driver.current_activity()
-        logging.info(f'当前已启动activity： {current_activity}')
+        logging.info(f'当前已启动activity： {self.driver.current_activity}')
         self.driver.start_activity(app_package, app_activity)
-        logging.info(f'当前已启动activity： {current_activity}')
+        logging.info(f'当前已启动activity： {self.driver.current_activity}')
 
     def app_strings(self):
         '''返回应用程序的字符串'''
@@ -345,6 +342,7 @@ class BasePage(Swipe, Action, KeyEvent, AssertBase):
         wait = WebDriverWait(self.driver, timeout, fre)
         wait.until(fun)
 
+    @cb.com_try_catch
     def click_element(self, locator, is_button=True):
         """
         点击
@@ -359,6 +357,7 @@ class BasePage(Swipe, Action, KeyEvent, AssertBase):
             element = self.get_element(locator)
             TouchAction(self.driver).tap(element).perform()
 
+    @cb.com_try_catch
     def set_text(self, locator, values):
         """
         为输入框 输入字符内容
@@ -366,12 +365,9 @@ class BasePage(Swipe, Action, KeyEvent, AssertBase):
         :param values:
         :return:
         """
-        try:
-            text_field = self.get_element(locator)
-            text_field.clear()
-            text_field.send_keys(values)
-        except Exception as msg:
-            logging.error(msg)
+        text_field = self.get_element(locator)
+        text_field.clear()
+        text_field.send_keys(values)
 
     def clean_app_cash(self,app_package):
         '''清除app缓存'''

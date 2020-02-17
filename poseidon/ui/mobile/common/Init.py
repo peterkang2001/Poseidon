@@ -12,16 +12,14 @@ import json
 import logging
 import subprocess
 import sys
-
 import os
-
 import redis
 import requests
 import time
 
 class Init(object):
 
-    def __execute(self, method=None, url=None, data=None, json_data=None, timeout=30, serial=None):
+    def _execute(self, method=None, url=None, data=None, json_data=None, timeout=30, serial=None):
         result = {}
         maxtime = time.time() + float(timeout)
         while time.time() < maxtime:
@@ -81,6 +79,23 @@ class Init(object):
             return "error"
         return out.decode('utf-8')
 
+    def get_devices(self):
+        cmd = 'adb devices'
+        try:
+            data = self.shell(cmd)
+            data = data.strip('List of devices attached').split()
+            device_list = [x for x in data if x != 'device']
+            if len(device_list) > 0:
+                return device_list
+            else:
+                logging.info('No devices list, please start a deivce first!')
+                return []
+        except Exception as e:
+            print(e)
+
+    def start_appium_server(self):
+        print()
+
     def start_android_server(self, serial):
         count = 5
         cmd = "adb -s {0} shell exec nohup app_process -Djava.class.path=/data/local/tmp/app-process.apk /system/bin com.yyl.android.Main >/dev/null 2>&1 &".format(serial)
@@ -91,21 +106,6 @@ class Init(object):
         while self.status_android_server(ip, serial)['status'] == 'error' and count > 0:
             count = count - 1
             self.shell(cmd)
-
-    def get_devices(self):
-        cmd = 'adb devices'
-        try:
-            data = self.shell(cmd)
-            data = data.strip('List of devices attached').split()
-            device_list = [x for x in data if x != 'device']
-            if len(device_list) > 0:
-                return device_list
-            else:
-                return []
-                for i in range(3):
-                    logging.warning('please make sure there is a device connected your computer with usb !!!')
-        except Exception as e:
-            print(e)
 
     @staticmethod
     def download(url, target_file_path):
@@ -139,7 +139,7 @@ class Init(object):
 
     def status_android_server(self, ip, serial):
         logging.info("通过ip检查设备:{0} 60002服务是否成功启动".format(serial))
-        return self.__execute(method="GET", url="http://{0}:{1}/health".format(ip, 60002), serial=serial)
+        return self._execute(method="GET", url="http://{0}:{1}/health".format(ip, 60002), serial=serial)
 
     def reboot(self, num):
         devices = self.get_devices()
@@ -154,24 +154,18 @@ class Init(object):
                 time.sleep(15)
                 break
 
-# init = Init()
-# devices = init.get_devices()
-# print(init.shell("adb shell reboot"))
-# print(init.shell(
-#     "adb shell am start -a android.intent.action.VIEW -n com.yyl.android.uiautomator2.server/com.yyl.android.ui.MainActivity -W —S"))
-# print(init.shell("adb shell input swipe 300 1500 300 0 100"))
 
 if __name__ == '__main__':
     try:
-        if len(sys.argv) < 2:
-            print("请指定初始化设备数")
-            sys.exit(0)
-        print("初始化设备数为: {0} ".format(sys.argv[1]))
+        # if len(sys.argv) < 2:
+        #     print("请指定初始化设备数")
+        #     sys.exit(0)
+        # print("初始化设备数为: {0} ".format(sys.argv[1]))
         init = Init()
         devices = init.get_devices()
-        if len(devices) < int(sys.argv[1]):
-            print("请检查设备是否都能成功连接电脑，当前连接数为: {0},指定初始化设备数为:{1} ".format(len(devices), sys.argv[1]))
-            sys.exit(0)
+        # if len(devices) < int(sys.argv[1]):
+        #     print("请检查设备是否都能成功连接电脑，当前连接数为: {0},指定初始化设备数为:{1} ".format(len(devices), sys.argv[1]))
+        #     sys.exit(0)
         path_apk = os.getcwd()
         print("apk下载目录 : " + os.getcwd())
         print("设备重启中,请稍等片刻...")

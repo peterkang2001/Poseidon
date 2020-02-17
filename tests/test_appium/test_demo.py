@@ -43,7 +43,11 @@ class TestAndroidDemo():
     def test_touch_action(self, driver_dict):
         search_page = SearchPage(driver_dict)
         logging.info('测试打开百度-搜索用户信息')
-        search_page.check_and_install_app(self.dict_path, describe='判断百度app是否安装，若未安装，执行安装')
+        search_page.check_and_install_app(self.dict_path, describe='判断词场app是否安装，若未安装，执行安装')
+        search_page.open_login_page(describe='打开词场登录页面')
+        search_page.click_start_immediately(describe='点击立即开启')
+        search_page.click_uname_pwd_login(describe='点击帐号+密码登录')
+        search_page.login_pass()
 
 
 

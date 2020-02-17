@@ -9,8 +9,8 @@
 
 import pytest
 from datetime import datetime, timedelta
-from business.bus_api import bus_base as biz
-from data.data_api import data_base as base
+from tests.business.bus_api import bus_base as biz
+from tests.data.data_api import data_base as base
 from poseidon.base import CommonBase as cb
 from poseidon.base.Env import Env
 from poseidon.base.Frequency import Frequency

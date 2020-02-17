@@ -8,7 +8,16 @@ import pytest
 import logging
 from pytest_testconfig import config as pyconfig
 from poseidon.base.SendMail import SendMail
+from poseidon.base.IP import IP
 
+
+def pytest_configure(config):
+    '''修改Environment中内容'''
+    config._metadata['Current Env'] = pyconfig.get('env', 'qa')
+    config._metadata.pop("JAVA_HOME")
+
+def pytest_html_results_summary(prefix):
+    prefix.extend([html.p(f"Runner: {IP.get_host_name()[0]} at {IP.get_host_ip()}")])
 
 @pytest.mark.optionalhook
 def pytest_html_results_table_header(cells):
@@ -28,14 +37,13 @@ def pytest_html_results_table_html(report, data):
     """ Called after building results table additional HTML. """
     pass
 
-
-
 @pytest.mark.hookwrapper
-def pytest_runtest_makereport(item, call):
+def pytest_runtest_makereport(item):
     outcome = yield
     report = outcome.get_result()
     report.description = str(item.function.__doc__)
-    report.nodeid = report.nodeid.encode("utf-8").decode("unicode_escape")
+    # report.nodeid = report.nodeid.encode("utf-8").decode("unicode_escape")
+
 
 def pytest_runtest_setup(item):
     import re
