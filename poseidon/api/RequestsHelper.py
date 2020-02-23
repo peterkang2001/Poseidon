@@ -40,83 +40,118 @@ class Requests:
         return resp
 
     def _sendRequest_pycurl(self, method, url, data=None, headers=None, cookie=None, files=None,
-                    httpStatusExp=None, statusExp=None, needJson=True, bText=True,agent=None, **kwargs):
+                            httpStatusExp=None, statusExp=None, needJson=True, bText=True, agent=None, **kwargs):
         try:
             import pycurl
 
-            buffer = BytesIO()
-            c = pycurl.Curl()
-            c.setopt(pycurl.URL,url)
-            c.setopt(pycurl.WRITEDATA, buffer)
+            b = BytesIO()  # 创建缓存对象
+            c = pycurl.Curl()  # 创建一个curl对象
+            c.setopt(pycurl.URL, url)
+            c.setopt(pycurl.WRITEDATA, b)  # 设置资源数据写入到缓存对象
             if pyconfig["sections"].get('http').get("debug").lower() == 'true':
                 c.setopt(pycurl.VERBOSE, True)
 
+            logging.info("请求url: {}".format(url))
+            logging.info("请求method: {}".format(method))
 
             if headers is None:
                 c.setopt(pycurl.HTTPHEADER, self._default_header)
-                logging.info("请求header:{}".format(self._default_header))
-                logging.info("请求header type is :{}".format(type(self._default_header)))
+                logging.info("请求header: {}".format(self._default_header))
+                logging.info("请求header type is: {}".format(type(self._default_header)))
             else:
                 if isinstance(headers, list):
                     c.setopt(pycurl.HTTPHEADER, headers)
-                    logging.info("请求header:{}".format(headers))
-                    logging.info("请求header type is :{}".format(type(headers)))
+                    logging.info("请求header: {}".format(headers))
+                    logging.info("请求header type is: {}".format(type(headers)))
                 else:
-                    _headers = self.conver_header_dict_2_list(headers)
-                    c.setopt(pycurl.HTTPHEADER, _headers)
-                    logging.info("请求header:{}".format(headers))
-                    logging.info("请求header type is :{}".format(type(headers)))
+                    c.setopt(pycurl.HTTPHEADER, self.conver_header_dict_2_list(headers))
+                    logging.info("请求header: {}".format(self.conver_header_dict_2_list(headers)))
+                    logging.info("请求header type is: {}".format(type(self.conver_header_dict_2_list(headers))))
 
             if agent is None:
-                c.setopt(pycurl.USERAGENT, self.get_agent())
-                logging.info("请求agent:{}".format(self.get_agent()))
-            else:
-                c.setopt(pycurl.USERAGENT, agent)
-                logging.info("请求agent:{}".format(agent))
+                agent = self.get_agent()
+
+            c.setopt(pycurl.USERAGENT, agent)  # agent加入c对象
+            logging.info("请求agent:{}".format(agent))
 
             if data is not None:
                 new_headers = self.dict_key_to_lower(headers)
-                if 'content-type' in new_headers and new_headers.get('content-type') == 'application/x-www-form-urlencoded':
+                if 'content-type' in new_headers and new_headers.get(
+                    'content-type') == 'application/x-www-form-urlencoded':
                     c.setopt(pycurl.POSTFIELDS, self.conver_data_dict_to_str(data))
-                    logging.info("请求data:{}".format(data))
-                else:
+                    logging.info("请求data: {}".format(data))
+                elif 'content-type' in new_headers and new_headers.get('content-type') == 'application/json':
                     c.setopt(pycurl.POSTFIELDS, json.dumps(data))
-                    logging.info("请求data:{}".format(json.dumps(data)))
-            else:
-                logging.info("请求data:{}".format(None))
+                    logging.info("请求data: {}".format(json.dumps(data)))
 
             if method == "GET":
-                logging.info("请求method:{}".format(method))
                 pass
             elif method == "PUT":
-                logging.info("请求method:{}".format(method))
                 c.setopt(pycurl.CUSTOMREQUEST, "PUT")
             elif method == "DELETE":
-                logging.info("请求method:{}".format(method))
                 c.setopt(pycurl.CUSTOMREQUEST, "DELETE")
             elif method == "POST":
-                logging.info("请求method:{}".format(method))
                 c.setopt(pycurl.CUSTOMREQUEST, "POST")
             elif method == "PATCH":
-                logging.info("请求method:{}".format(method))
                 c.setopt(pycurl.CUSTOMREQUEST, "PATCH")
             else:
-                pass
-
+                logging.error('not support method: {}'.format(method))
 
             # 增加容错处理，默认retry_num=3
             for i in range(self._retry_num):
                 try:
                     self.bContinue = False
                     c.perform()
+
+                    total_time = c.getinfo(pycurl.TOTAL_TIME)  # 上一请求总的时间
+                    dns_time = c.getinfo(pycurl.NAMELOOKUP_TIME)  # 域名解析时间
+                    connect_time = c.getinfo(pycurl.CONNECT_TIME)  # 远程服务器连接时间
+                    redirect_time = c.getinfo(pycurl.REDIRECT_TIME)  # 重定向所消耗的时间
+                    ssl_time = c.getinfo(pycurl.APPCONNECT_TIME)  # SSL建立握手时间
+                    pretrans_time = c.getinfo(pycurl.PRETRANSFER_TIME)  # 连接上后到开始传输时的时间
+                    starttrans_time = c.getinfo(pycurl.STARTTRANSFER_TIME)  # 接收到第一个字节的时间
+
+                    transfer_time = total_time - starttrans_time  # 传输时间
+                    serverreq_time = starttrans_time - pretrans_time  # 服务器响应时间，包括网络传输时间
+                    if ssl_time == 0:
+                        if redirect_time == 0:
+                            clientper_time = pretrans_time - connect_time  # 客户端准备发送数据时间
+                            redirect_time = 0
+                        else:
+                            clientper_time = pretrans_time - redirect_time
+                            redirect_time = redirect_time - connect_time
+                        ssl_time = 0
+                    else:
+                        clientper_time = pretrans_time - ssl_time
+
+                        if redirect_time == 0:
+                            ssl_time = ssl_time - connect_time
+                            redirect_time = 0
+                        else:
+                            ssl_time = ssl_time - redirect_time
+                            redirect_time = redirect_time - connect_time
+
+                    connect_time = connect_time - dns_time
+                    logging.info('请求总时间: %.3f ms' % (total_time * 1000))
+                    logging.info('DNS域名解析时间 : %.3f ms' % (dns_time * 1000))
+                    logging.info('TCP连接消耗时间 : %.3f ms' % (connect_time * 1000))
+                    logging.info('重定向时间: %.3f ms' % (redirect_time * 1000))
+                    logging.info('SSL握手消耗时间 : %.3f ms' % (ssl_time * 1000))
+                    logging.info('客户端发送请求准备时间: %.3f ms' % (clientper_time * 1000))
+                    logging.info('服务器处理时间: %.3f ms' % (serverreq_time * 1000))
+                    logging.info('数据传输时间: %.3f ms' % (transfer_time * 1000))
+
+                    reps_code = c.getinfo(pycurl.RESPONSE_CODE)
+                    body = b.getvalue()
                     c.close()
-                    body = buffer.getvalue()
+
                     break
                 except Exception as e:
                     msg = "send request [%s] %s failed: %s" % (method, url, str(e))
                     logging.info(e)
                     logging.info(msg)
-                    if (str(e).find('Max retries exceeded') > 0 or str(e).find('Read timed out') > 0 or str(e).find('Connection aborted') > -1) and i + 1 < self._retry_num:
+                    if (str(e).find('Max retries exceeded') > 0 or str(e).find('Read timed out') > 0 or str(e).find(
+                        'Connection aborted') > -1) and i + 1 < self._retry_num:
                         time.sleep(10)
                         self.bContinueb = True
                         continue
@@ -125,6 +160,7 @@ class Requests:
                     if not self.bContinue:
                         pass
 
+            cb.checkEqual(reps_code, httpStatusExp)
             resp = body.decode('utf-8')
             if needJson:
                 logging.info("响应response:{}".format(resp))
@@ -134,30 +170,34 @@ class Requests:
                 logging.info("响应response:{}".format(resp))
                 return resp
         except Exception as e:
-            logging.error("看看看")
             logging.error(e)
 
-
     def _sendRequest_requests(self, method, url, data=None, headers=None, cookie=None, files=None,
-                    httpStatusExp=None, statusExp=None, needJson=True, bText=True,agent=None, **kwargs):
+                              httpStatusExp=None, statusExp=None, needJson=True, bText=True, agent=None, **kwargs):
 
         import requests
+
+        if headers is None:  # 如果header为空，默认header
+            headers = self._default_header
+
         if isinstance(headers, list):
             headers = self.conver_header_list_2_dict(headers)
 
-        # 如果发送请求为x-www-form-urlencoded，需把value转为str
         new_headers = self.dict_key_to_lower(headers)
-        if 'content-type' in new_headers and new_headers.get('content-type') == 'application/x-www-form-urlencoded':
-            data = self.conver_data_dict_to_str(data) if data else None
-            logging.info("请求data:{}".format(data if data else data))
-        else:
+        if 'content-type' in new_headers and new_headers['content-type'] == 'application/x-www-form-urlencoded':
+            data = data if data else None
+        elif 'content-type' in new_headers and new_headers['content-type'] == 'application/json':
             data = json.dumps(data) if data else None
-            logging.info("请求data:{}".format(json.loads(data) if data else data))
+        elif 'content-type' in new_headers and new_headers['content-type'] == 'multipart/form-data':
+            files = files if files else logging.error('files cannot none!')
+            # files = {'file': ('report.xls', open('report.xls', 'rb'), 'application/vnd.ms-excel', {'Expires': '0'})}
+            # files= {'image': ('test.jpg', open(r'C:\Users\Administrator\Desktop\MiniProgrmTest\zz.jpg', 'rb'), 'image/jpg')}
 
-        logging.info("请求url:{}".format(url))
-        logging.info("请求header:{}".format(json.dumps(headers)))
-        logging.info("请求header type is :{}".format(type(headers)))
-        logging.info("请求method:{}".format(method))
+        logging.info("请求url: {}".format(url))
+        logging.info("请求method: {}".format(method))
+        logging.info("请求header: {}".format(headers))
+        logging.info("请求header type is: {}".format(type(headers)))
+        logging.info("请求data: {}".format(data))
 
         # 增加容错处理，默认retry_num=3
         for i in range(self._retry_num):
@@ -169,35 +209,37 @@ class Requests:
                         resp = requests.get(url, cookie, headers=headers, timeout=self._timeout, stream=True,
                                             verify=False)
                     else:
-                        resp = requests.get(url,cookie, headers=headers, timeout=self._timeout, stream=True)
+                        resp = requests.get(url, cookie, headers=headers, timeout=self._timeout, stream=True)
 
                 elif method == "PUT":
                     if "https" in url:
-                        resp = requests.put(url,data=data, headers=headers,  timeout=self._timeout, stream=True,
-                                             verify=False)
+                        resp = requests.put(url, data=data, headers=headers, timeout=self._timeout, stream=True,
+                                            verify=False)
                     else:
                         resp = requests.put(url, data=data, headers=headers, timeout=self._timeout, stream=True)
 
                 elif method == "DELETE":
                     if "https" in url:
                         resp = requests.delete(url, data=data, headers=headers, timeout=self._timeout, stream=True,
-                                             verify=False)
+                                               verify=False)
                     else:
-                        resp = requests.delete(url, data=data,  headers=headers, timeout=self._timeout, stream=True)
+                        resp = requests.delete(url, data=data, headers=headers, timeout=self._timeout, stream=True)
 
                 elif method == "POST":
                     if "https" in url:
-                        resp = requests.post(url,data=data, headers=headers, timeout=self._timeout,stream=True,
+                        resp = requests.post(url, data=data, files=files, headers=headers, timeout=self._timeout,
+                                             stream=True,
                                              verify=False)
                     else:
-                        resp = requests.post(url, data=data, headers=headers, timeout=self._timeout,stream=True)
+                        resp = requests.post(url, data=data, files=files, headers=headers, timeout=self._timeout,
+                                             stream=True)
 
                 elif method == "PATCH":
                     if "https" in url:
-                        resp = requests.patch(url, data=data, headers=headers, timeout=self._timeout,stream=True,
-                                             verify=False)
+                        resp = requests.patch(url, data=data, headers=headers, timeout=self._timeout, stream=True,
+                                              verify=False)
                     else:
-                        resp = requests.patch(url, data=data, headers=headers, timeout=self._timeout,stream=True)
+                        resp = requests.patch(url, data=data, headers=headers, timeout=self._timeout, stream=True)
                 else:
                     logging.error("The request method %s is not in ['post','get','put','delete','patch']")
                     assert False
@@ -208,7 +250,8 @@ class Requests:
                 msg = "send request [%s] %s failed: %s" % (method, url, str(e))
                 logging.info(e)
                 logging.info(msg)
-                if (str(e).find('Max retries exceeded') > 0 or str(e).find('Read timed out') > 0 or str(e).find('Connection aborted') > -1) and i + 1 < self._retry_num:
+                if (str(e).find('Max retries exceeded') > 0 or str(e).find('Read timed out') > 0 or str(e).find(
+                    'Connection aborted') > -1) and i + 1 < self._retry_num:
                     time.sleep(10)
                     self.bContinueb = True
                     continue
@@ -222,12 +265,14 @@ class Requests:
             logging.info("校验status_code")
             cb.checkEqual(resp.status_code, int(httpStatusExp))
 
-        resp = resp.text
-        logging.info("响应response:{}".format(resp))
+        # 输出响应头
+        logging.info('响应headers: {}'.format(resp.headers))
+        resp_content = resp.content
+        logging.info("响应response:{}".format(resp_content))
         if needJson:
-            return json.loads(resp)
+            return json.loads(resp_content)
         else:
-            return resp
+            return resp_content
 
     #region function
 

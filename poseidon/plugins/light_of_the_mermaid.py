@@ -10,6 +10,7 @@ from pytest_testconfig import config as pyconfig
 from poseidon.base.SendMail import SendMail
 from poseidon.base.IP import IP
 
+# 测试报告相关
 
 def pytest_configure(config):
     '''修改Environment中内容'''
@@ -44,6 +45,20 @@ def pytest_runtest_makereport(item):
     report.description = str(item.function.__doc__)
     # report.nodeid = report.nodeid.encode("utf-8").decode("unicode_escape")
 
+
+# assert相关
+class Foo:
+    def __init__(self, val):
+         self.val = val
+
+    def __eq__(self, other):
+        return self.val == other.val
+
+def pytest_assertrepr_compare(op, left, right):
+    '''比较两个对象相等'''
+    if isinstance(left, Foo) and isinstance(right, Foo) and op == "==":
+        return ['Foo实例对比:',
+                '   值: %s != %s' % (left.val, right.val)]
 
 def pytest_runtest_setup(item):
     import re
