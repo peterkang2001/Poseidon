@@ -1,15 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 """
    Author:       kangliang
    date:         2019-05-08
 """
+
+import logging
+import json
+import requests
+import time
+import poseidon.base.CommonBase as cb
 from poseidon.api.Curl_conf import Curl_conf
 from pytest_testconfig import config as pyconfig
 from io import BytesIO
-import logging, json
-import time
-import poseidon.base.CommonBase as cb
+from requests_toolbelt import MultipartEncoder
+from datetime import datetime
+
 
 class Requests:
     """
@@ -23,7 +30,8 @@ class Requests:
     _timeout = 30
 
     def sendRequest(self, method, url, data=None, headers=None, cookie=None, files=None,
-                    httpStatusExp=None, statusExp=None, needJson=True, bText=True,agent=None, **kwargs):
+                    httpStatusExp=None, statusExp=None, needJson=True, bText=True,agent=None,
+                    multipartEncodedContent=None,  **kwargs):
         # 根据_http_mode 来选择不同的http请求插件
 
         _method = method.strip().upper()
@@ -34,13 +42,22 @@ class Requests:
                     httpStatusExp, statusExp, needJson, bText,agent, **kwargs)
         else:
             logging.info("使用requests发送请求")
-            resp = self._sendRequest_requests(_method , url, data, headers, cookie, files,
+            if multipartEncodedContent:   # 使用multipart类型的请求
+                resp = self._sendRequest_multipart(_method, url, headers, cookie, httpStatusExp, statusExp,
+                                                   needJson, bText, multipartEncodedContent)
+            else:
+                resp = self._sendRequest_requests(_method , url, data, headers, cookie, files,
                                               httpStatusExp, statusExp, needJson, bText,agent, **kwargs)
-
         return resp
 
     def _sendRequest_pycurl(self, method, url, data=None, headers=None, cookie=None, files=None,
                             httpStatusExp=None, statusExp=None, needJson=True, bText=True, agent=None, **kwargs):
+        '''
+        pycurl发送发送API请求，支持application/x-www-form-urlencoded，application/json格式
+        同时输出请求时间片段
+
+        '''
+
         try:
             import pycurl
 
@@ -68,13 +85,17 @@ class Requests:
                     logging.info("请求header: {}".format(self.conver_header_dict_2_list(headers)))
                     logging.info("请求header type is: {}".format(type(self.conver_header_dict_2_list(headers))))
 
-            if agent is None:
+            if agent:
+                c.setopt(pycurl.USERAGENT, agent)  # agent加入c对象
+                logging.info("请求agent:{}".format(agent))
+            else:
                 agent = self.get_agent()
+                c.setopt(pycurl.USERAGENT, agent)  # agent加入c对象
 
-            c.setopt(pycurl.USERAGENT, agent)  # agent加入c对象
-            logging.info("请求agent:{}".format(agent))
+            if cookie:
+                c.setopt(pycurl.COOKIE, cookie)   # cookie加入c对象
 
-            if data is not None:
+            if data:
                 new_headers = self.dict_key_to_lower(headers)
                 if 'content-type' in new_headers and new_headers.get(
                     'content-type') == 'application/x-www-form-urlencoded':
@@ -141,10 +162,9 @@ class Requests:
                     logging.info('服务器处理时间: %.3f ms' % (serverreq_time * 1000))
                     logging.info('数据传输时间: %.3f ms' % (transfer_time * 1000))
 
-                    reps_code = c.getinfo(pycurl.RESPONSE_CODE)
+                    reps_code = c.getinfo(pycurl.RESPONSE_CODE)   # 返回code
                     body = b.getvalue()
                     c.close()
-
                     break
                 except Exception as e:
                     msg = "send request [%s] %s failed: %s" % (method, url, str(e))
@@ -160,22 +180,28 @@ class Requests:
                     if not self.bContinue:
                         pass
 
-            cb.checkEqual(reps_code, httpStatusExp)
-            resp = body.decode('utf-8')
-            if needJson:
-                logging.info("响应response:{}".format(resp))
-                return json.loads(resp)
-
-            else:
-                logging.info("响应response:{}".format(resp))
-                return resp
         except Exception as e:
             logging.error(e)
+
+        if httpStatusExp:
+            logging.info("校验httpStatusExp")
+            cb.checkEqual(reps_code, httpStatusExp)
+
+        resp = body.decode('utf-8')
+        logging.info("响应response:{}".format(resp))
+
+        if needJson:
+            return json.loads(resp)
+        else:
+            return resp
 
     def _sendRequest_requests(self, method, url, data=None, headers=None, cookie=None, files=None,
                               httpStatusExp=None, statusExp=None, needJson=True, bText=True, agent=None, **kwargs):
 
-        import requests
+        '''
+        request发送发送API请求，支持application/x-www-form-urlencoded，application/json格式
+
+        '''
 
         if headers is None:  # 如果header为空，默认header
             headers = self._default_header
@@ -188,10 +214,9 @@ class Requests:
             data = data if data else None
         elif 'content-type' in new_headers and new_headers['content-type'] == 'application/json':
             data = json.dumps(data) if data else None
-        elif 'content-type' in new_headers and new_headers['content-type'] == 'multipart/form-data':
-            files = files if files else logging.error('files cannot none!')
-            # files = {'file': ('report.xls', open('report.xls', 'rb'), 'application/vnd.ms-excel', {'Expires': '0'})}
-            # files= {'image': ('test.jpg', open(r'C:\Users\Administrator\Desktop\MiniProgrmTest\zz.jpg', 'rb'), 'image/jpg')}
+        if 'content_tyep' in new_headers and new_headers['content-type'] == 'multipart/form-data':
+            files = files if files else None
+            # files = {'file':open('xxx.xls', 'rb')}
 
         logging.info("请求url: {}".format(url))
         logging.info("请求method: {}".format(method))
@@ -206,40 +231,39 @@ class Requests:
 
                 if method == "GET":
                     if "https" in url:
-                        resp = requests.get(url, cookie, headers=headers, timeout=self._timeout, stream=True,
-                                            verify=False)
+                        resp = requests.get(url, params=data, headers=headers, cookies=cookie, timeout=self._timeout,
+                                            stream=True, verify=False)
                     else:
-                        resp = requests.get(url, cookie, headers=headers, timeout=self._timeout, stream=True)
-
+                        resp = requests.get(url, params=data, headers=headers, cookies=cookie, timeout=self._timeout,
+                                            stream=True)
                 elif method == "PUT":
                     if "https" in url:
-                        resp = requests.put(url, data=data, headers=headers, timeout=self._timeout, stream=True,
-                                            verify=False)
+                        resp = requests.put(url, data=data, headers=headers, cookies=cookie, timeout=self._timeout,
+                                            stream=True, verify=False)
                     else:
-                        resp = requests.put(url, data=data, headers=headers, timeout=self._timeout, stream=True)
-
+                        resp = requests.put(url, data=data, headers=headers, cookies=cookie, timeout=self._timeout,
+                                            stream=True)
                 elif method == "DELETE":
                     if "https" in url:
-                        resp = requests.delete(url, data=data, headers=headers, timeout=self._timeout, stream=True,
-                                               verify=False)
+                        resp = requests.delete(url, data=data, headers=headers, cookies=cookie, timeout=self._timeout,
+                                               stream=True, verify=False)
                     else:
-                        resp = requests.delete(url, data=data, headers=headers, timeout=self._timeout, stream=True)
-
+                        resp = requests.delete(url, data=data, headers=headers, cookies=cookie, timeout=self._timeout,
+                                               stream=True)
                 elif method == "POST":
                     if "https" in url:
-                        resp = requests.post(url, data=data, files=files, headers=headers, timeout=self._timeout,
-                                             stream=True,
-                                             verify=False)
+                        resp = requests.post(url, data=data, files=files, headers=headers, cookies=cookie,
+                                             timeout=self._timeout, stream=True, verify=False)
                     else:
-                        resp = requests.post(url, data=data, files=files, headers=headers, timeout=self._timeout,
-                                             stream=True)
-
+                        resp = requests.post(url, data=data, files=files, headers=headers, cookies=cookie,
+                                             timeout=self._timeout, stream=True)
                 elif method == "PATCH":
                     if "https" in url:
-                        resp = requests.patch(url, data=data, headers=headers, timeout=self._timeout, stream=True,
-                                              verify=False)
+                        resp = requests.patch(url, data=data, headers=headers, cookies=cookie, timeout=self._timeout,
+                                              stream=True, verify=False)
                     else:
-                        resp = requests.patch(url, data=data, headers=headers, timeout=self._timeout, stream=True)
+                        resp = requests.patch(url, data=data, headers=headers, cookies=cookie, timeout=self._timeout,
+                                              stream=True)
                 else:
                     logging.error("The request method %s is not in ['post','get','put','delete','patch']")
                     assert False
@@ -261,18 +285,82 @@ class Requests:
                     pass
 
         # 校验httpStatusCode
-        if httpStatusExp is not None:
-            logging.info("校验status_code")
-            cb.checkEqual(resp.status_code, int(httpStatusExp))
+        if httpStatusExp:
+            logging.info("校验httpStatusExp")
+            cb.checkResultEqual(resp.status_code, httpStatusExp,
+                                f'actual status_code: {resp.status_code}, expect status_code: {httpStatusExp}')
 
-        # 输出响应头
+        # 输出响应头和响应内容
         logging.info('响应headers: {}'.format(resp.headers))
-        resp_content = resp.content
-        logging.info("响应response:{}".format(resp_content))
+
         if needJson:
-            return json.loads(resp_content)
-        else:
-            return resp_content
+            if bText:
+                resp_text = resp.text
+            else:
+                resp_text = resp.content
+            resp = cb.loadJsonData(resp_text)
+            logging.info("响应response:{}".format(resp))
+            if statusExp:
+                cb.checkValueInDict(resp, "status", statusExp,
+                                    "[Request] resp data['status'] does not match with %s" % str(statusExp))
+        return resp
+
+    def _sendRequest_multipart(self, method, url, headers=None, cookie=None, httpStatusExp=None, statusExp=None,
+                               needJson=True, bText=True, multipartEncodedContent=None):
+        '''
+        Send Multipart request with method post or put
+        '''
+        if not isinstance(multipartEncodedContent, MultipartEncoder):
+            raise RuntimeError("multipartEncodedContent invalid")
+
+        if headers is None:  # 如果header为空，默认header
+            headers = self._default_header
+
+        if isinstance(headers, list):
+            headers = self.conver_header_list_2_dict(headers)
+
+        headers.update({'Content-Type': multipartEncodedContent.content_type})
+        try:
+            if method == "POST":
+                if "https" in url:
+                    resp = requests.post(url, data=multipartEncodedContent, headers=headers,
+                                         verify=False, cookies=cookie)
+                else:
+                    resp = requests.post(url, data=multipartEncodedContent, headers=headers,
+                                         cookies=cookie)
+            elif method == "PUT":
+                if "https" in url:
+                    resp = requests.put(url, data=multipartEncodedContent, headers=headers,
+                                        verify=False, cookies=cookie)
+                else:
+                    resp = requests.put(url, data=multipartEncodedContent, headers=headers,
+                                        cookies=cookie)
+        except Exception as e:
+            print("[Request Exception] {0}: {1}".format(type(e), e))
+            msg = "send request {%s] %s failed: %s" % (method, url, str(e))
+            logging.error(e)
+            logging.error(msg)
+            assert False, msg
+
+        if httpStatusExp:
+            logging.info("校验httpStatusExp")
+            cb.checkResultEqual(resp.status_code, httpStatusExp,
+                                f'actual status_code: {resp.status_code}, expect status_code: {httpStatusExp}')
+
+        # 输出响应头信息
+        logging.info('响应headers: {}'.format(resp.headers))
+
+        if needJson:
+            if bText:
+                resp_text = resp.text
+            else:
+                resp_text = resp.content
+            resp = cb.loadJsonData(resp_text)
+            if statusExp:
+                cb.checkValueInDict(resp, "status", statusExp,
+                                            "[Request] resp data['status'] does not match with %s" % str(statusExp))
+        return resp
+
 
     #region function
 
