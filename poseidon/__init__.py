@@ -1,5 +1,3 @@
-# __version__ = '0.0.12_build-20022611'
-
 
 def _get_version(default='1.0.1.dev'):
     try:
