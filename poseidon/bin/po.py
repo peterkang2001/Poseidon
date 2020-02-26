@@ -13,8 +13,10 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.group(context_settings=CONTEXT_SETTINGS)
 @click.version_option(version=poseidon.__version__)
 def cli():
-    """poseido-admin：简单创建自动化脚本"""
+    """poseidon-admin：简单创建自动化脚本"""
+    print('acddqwd')
     pass
+
 
 @cli.command()
 @click.argument('name', default="mysite")

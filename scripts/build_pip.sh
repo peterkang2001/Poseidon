@@ -8,3 +8,4 @@ rm  -rf dist/
 # 本地编译系统
 python setup.py check &&
 python setup.py sdist
+

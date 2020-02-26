@@ -1,1 +1,11 @@
-__version__ = '0.0.8_build-20021415'
+# __version__ = '0.0.12_build-20022611'
+
+
+from pkg_resources import get_distribution, DistributionNotFound
+
+
+try:
+    __version__ = get_distribution(__name__).version
+except DistributionNotFound:
+    # package is not installed
+    __version__ = "unknown"

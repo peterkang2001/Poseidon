@@ -18,6 +18,8 @@ from requests_toolbelt import MultipartEncoder
 from datetime import datetime
 
 
+
+
 class Requests:
     """
     使用该类可以直接发起http请求
@@ -299,7 +301,7 @@ class Requests:
             else:
                 resp_text = resp.content
             resp = cb.loadJsonData(resp_text)
-            logging.info("响应response:{}".format(resp))
+            logging.info("响应response: {}".format(resp))
             if statusExp:
                 cb.checkValueInDict(resp, "status", statusExp,
                                     "[Request] resp data['status'] does not match with %s" % str(statusExp))
@@ -360,6 +362,7 @@ class Requests:
                 cb.checkValueInDict(resp, "status", statusExp,
                                             "[Request] resp data['status'] does not match with %s" % str(statusExp))
         return resp
+
 
 
     #region function

@@ -7,12 +7,11 @@
 
 """
 
+import logging
 
 from data.data_web import data_web
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
-import logging
 from poseidon.ui.pc.base_page import BasePage
 from poseidon.base import CommonBase as cb
 

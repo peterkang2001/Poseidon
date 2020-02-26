@@ -8,8 +8,8 @@ import sys
 
 
 def info(msg):
-    sys.stdout.write("{}\n".format(msg))
+    sys.stdout.write(f"{msg}\n".center(10, '#'))
 
 
 def err(msg):
-    sys.stderr.write("{}\n".format(msg))
+    sys.stderr.write(f"{msg}\n".center(10, '#'))

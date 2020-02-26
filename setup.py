@@ -14,7 +14,7 @@ import sys
 CURRENT_PYTHON = sys.version_info[:2]
 REQUIRED_PYTHON = (3, 6)
 
-# This check and everything above must remain compatible with Python 2.7.
+# check Python version.
 if CURRENT_PYTHON < REQUIRED_PYTHON:
     sys.stderr.write("""
 ==========================
@@ -24,13 +24,12 @@ Unsupported Python version
 This version of Poseidon requires Python {}.{}, but you're trying to
 install it on Python {}.{}.
 
-This may be because you ar
-e using a version of pip that doesn't
+This may be because you are using a version of pip that doesn't
 understand the python_requires classifier. Make sure you
 have pip >= 9.0 and setuptools >= 24.2, then try again:
 
     $ python -m pip install --upgrade pip setuptools
-    $ python -m pip install django
+    $ python -m pip install Poseidon-test
 
 This will install the latest version of Poseidon which works on your
 version of Python. If you can't upgrade your pip (or Python), request
@@ -41,9 +40,11 @@ an older version of Poseidon.
 
 
 from setuptools import setup, find_packages
-from poseidon.core.version import update_set_cfg_version
+# from poseidon.core.version import update_set_cfg_version
 
-update_set_cfg_version()
-setup()
+# update_set_cfg_version()
+setup(
+    use_scm_version=True,
+)
 
 
