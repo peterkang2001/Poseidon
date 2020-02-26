@@ -1,11 +1,21 @@
 # __version__ = '0.0.12_build-20022611'
 
 
-from pkg_resources import get_distribution, DistributionNotFound
+def _get_version(default='1.0.1.dev'):
+    try:
+        from pkg_resources import DistributionNotFound, get_distribution
+    except ImportError:
+        return default
+    else:
+        try:
+            return get_distribution(__name__).version
+        except DistributionNotFound:  # Run without install
+            return default
+        except ValueError:  # Python 3 setup
+            return default
+        except TypeError:  # Python 2 setup
+            return default
 
 
-try:
-    __version__ = get_distribution(__name__).version
-except DistributionNotFound:
-    # package is not installed
-    __version__ = "unknown"
+__version__ = _get_version()
+

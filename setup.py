@@ -44,7 +44,8 @@ from setuptools import setup, find_packages
 
 # update_set_cfg_version()
 setup(
-    use_scm_version=True,
+    setup_requires=['setuptools_scm'],
+    use_scm_version=True
 )
 
 
