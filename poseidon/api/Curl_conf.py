@@ -7,7 +7,7 @@
 
 
 class Curl_conf:
-
+    print('fewfewf')
     @property
     def default_header_template_1_pycurl(self):
         _header = ["hj_appkey: 8995b7abe8e0a8cb7f673fdc7b94f029",
