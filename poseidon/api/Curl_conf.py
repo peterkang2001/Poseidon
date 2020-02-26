@@ -7,6 +7,7 @@
 
 
 class Curl_conf:
+    print('dwqdwqdwq')
 
     @property
     def default_header_template_1_pycurl(self):
