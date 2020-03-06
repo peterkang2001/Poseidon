@@ -9,14 +9,15 @@
 
 import time
 import logging
-from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.by import By
 from appium.webdriver.common.touch_action import TouchAction
 from selenium.webdriver.support.wait import WebDriverWait
+from appium.webdriver.mobilecommand import MobileCommand
 from appium.webdriver.connectiontype import ConnectionType
 from poseidon.ui.util.location import *
 from poseidon.base import CommonBase as cb
 from poseidon.ui.mobile.android.android_keycode import KEYCODE
+
 
 class Swipe:
     '''滚动屏幕相关'''
@@ -281,9 +282,9 @@ class BasePage(Swipe, Action, KeyEvent, AssertBase):
         :param app_activity: 需要打开的界面
         :return: 在当前应用中打开一个activity或者启动一个新应用并打开一个 activity
         '''
-        logging.info(f'当前已启动activity： {self.driver.current_activity}')
+        logging.info(f'当前activity： {self.driver.current_activity}')
         self.driver.start_activity(app_package, app_activity)
-        logging.info(f'当前已启动activity： {self.driver.current_activity}')
+        logging.info(f'当前activity： {self.driver.current_activity}')
 
     def app_strings(self):
         '''返回应用程序的字符串'''
@@ -317,12 +318,11 @@ class BasePage(Swipe, Action, KeyEvent, AssertBase):
         '''模拟设备摇晃'''
         self.driver.shake()
 
-    def get_content(self):
+    def current_content(self):
         '''进入指定上下文'''
         current_content = self.driver.current_context   # 列出当前上下文
         current_contents = self.driver.contents   # 列出所有的可用上下文
         return current_content
-
 
     @cb.com_try_catch
     def backgroup_app(self, seconds:int, restart=True):
@@ -403,6 +403,18 @@ class BasePage(Swipe, Action, KeyEvent, AssertBase):
                 self.driver.execute_script(js, element)
         except Exception as e:
             logging.error(e)
+
+    def switch_h5_app(self, context):
+        self.driver.execute(MobileCommand.SWITCH_TO_CONTEXT, {"name": context})
+
+    def find_item(self, el):
+        '''验证页面元素是否存在'''
+        logging.info(f'验证页面元素：{el} 是否存在')
+        source = self.driver.page_source
+        if el in source:
+            return True
+        else:
+            return False
 
 
 

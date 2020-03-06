@@ -515,8 +515,6 @@ class TestAndroid:
 
         driver.quit()
 
-        aaa = dict()
-
 
 
 

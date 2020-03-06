@@ -49,13 +49,13 @@ class TestAndroid:
         pass
 
     def test_start_activity(self, driver_base):
-        '''打开其他app：使用自定义fixture'''
+        '''打开app：使用自定义fixture: driver_base'''
 
         time.sleep(3)
         driver_base.start_activity(self.app_mis.appPackage, self.app_mis.appActivity)
 
     def test_start_activity2(self, driver_android):
-        '''打开其他app：使用通用fixture，获取pytest.ini中配置'''
+        '''打开app：使用默认fixture：driver_android，默认获取pytest.ini中配置'''
 
         time.sleep(3)
         driver_android.start_activity(self.app_mis.appPackage, self.app_mis.appActivity)
