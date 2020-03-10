@@ -14,7 +14,6 @@ namedlist==1.7
 packaging==19.2
 pbr==5.4.4
 pluggy==0.13.1
-poseidon==1.0.1.dev1+g49d79e1.d20200226
 post==2019.4.13
 public==2019.4.13
 py==1.8.0
