@@ -16,7 +16,7 @@ pbr==5.4.4
 pluggy==0.13.1
 post==2019.4.13
 public==2019.4.13
-py==1.8.0
+py==1.10.0
 pycurl==7.43.0.5
 pyDes==2.0.1
 pymemcache==3.0.0
