@@ -2,7 +2,7 @@ allure-pytest==2.8.11
 allure-python-commons==2.8.11
 Appium-Python-Client==0.50
 attrs==19.3.0
-certifi==2019.11.28
+certifi==2022.12.7
 chardet==3.0.4
 Click==7.0
 enum34==1.1.9
